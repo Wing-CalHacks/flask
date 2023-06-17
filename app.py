@@ -1,12 +1,17 @@
-from flask import Flask, request
-from llama_index import download_loader, SimpleDirectoryReader
+from flask import Flask, request, send_file
+from flask_cors import cross_origin
+from werkzeug.utils import secure_filename
+import os
 
 
 app = Flask(__name__)
 
-@app.route("/")
+
+@app.route('/upload', methods=['POST'])
+@cross_origin()
 def upload_file():
     file = request.files['file']
-    loader = SimpleDirectoryReader('./data', recursive=True, exclude_hidden=True)
-    documents = loader.load_data()
-    return documents
+    filename = secure_filename(file.filename)
+    file_path = os.path.join('data', filename)
+    file.save(file_path)
+    return send_file(file_path, as_attachment=True)
