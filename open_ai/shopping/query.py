@@ -8,6 +8,7 @@ import openai
 from langchain.vectorstores import Chroma, Pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 import pinecone
+from send_email import message_send
 embeddings = OpenAIEmbeddings(
     openai_api_key="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")
 embeddings = OpenAIEmbeddings(
@@ -110,7 +111,8 @@ def getResponse(query, user_profile, docsearch):
     result = (chain.run(input_documents=docs, question=prompt))
     print(parseResponse(result))
     print(strengthen_profile(user_profile, query + "\n" + result))
-    print(sendOutreachEmail(user_profile, query + "\n" + result, "There is a new summer sale selling all blue clothes for 50 dollars off", docsearch))
+    email = (sendOutreachEmail(user_profile, query + "\n" + result, "There is a new summer sale selling all blue clothes for 50 dollars off", docsearch))
+    message_send(email, "arthbohra@berkeley.edu")
     return result
 
 
