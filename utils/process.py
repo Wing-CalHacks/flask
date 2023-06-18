@@ -3,50 +3,71 @@ import openai
 from openai.embeddings_utils import cosine_similarity
 import matplotlib
 from langchain.embeddings import OpenAIEmbeddings
+from llama_index import download_loader
+import urllib.request
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+
+
+
+import csv
 embeddings = OpenAIEmbeddings(
     openai_api_key="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")
 openai.api_key = "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"
 
 
 def getCSV(filename):
-    with open(filename, 'r') as f:
-        return f.read()
+    with open(filename) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        csv_string = ""
+        column_headers = []
+        for row in csv_reader:
+            if line_count == 0:
+                for col in row:
+                    column_headers.append(col)
+                    csv_string += f'"{col}": "{col}",'
+                line_count += 1
+            else:
+                csv_string += "{"
+                i = 0
+                for col in row:
+                    csv_string += f'"{column_headers[i]}": "{col}",'
+                    i += 1
+                csv_string += "},"
+                line_count += 1
+        return csv_string
+
+
 
 def getJSON(filename):
-    with open(filename) as json_file:
-        data = json.load(json_file)
-        return data
+    # turn the json file into a json string
+    json_string = ""
+    json_file = open(filename)
+    json_data = json.load(json_file)
+    for item in json_data:
+        json_string += json.dumps(item)
+    return json_string
 
 
-def getEmbeddedProducts(products, format):
-    embeds = {}
-    for p in products:
-        embeds[p] = embeddings.embed_query(p)
-    # export embeddings to a file
-    with open('data/embeddings.json', 'w') as outfile:
-        json.dump(embeds, outfile)
-    return embeds
+def getWebsite(url):
+    html = urlopen(url).read()
+    soup = BeautifulSoup(html, features="html.parser")
 
+    # kill all script and style elements
+    for script in soup(["script", "style"]):
+        script.extract()    # rip it out
 
-# turns each string into a product object and converts to json
-def process_products(inputs):
-    products = []
-    for item in inputs:
-        product = create_product_object(item[0])
-        product_json = json.dumps(product, cls=ProductEncoder)
-        product_dict = json.loads(product_json)
-        products.append(product_dict)
+    # get text
+    text = soup.get_text()
 
-    return products
-
-def product_template(products):
-    res = []
-    for p in products:
-        res.append(
-            {
-                'name': p['title'],
-                'desc': p['desc']
-            }
-        )
-    return str(res)
+    # break into lines and remove leading and trailing space on each
+    lines = (line.strip() for line in text.splitlines())
+    # break multi-headlines into a line each
+    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+    # drop blank lines
+    text = '\n'.join(chunk for chunk in chunks if chunk)
+    return text
 
