@@ -11,10 +11,11 @@ def strengthen_profile(cur_profile, recent_chat, products_bought):
     By adding information, we don't want to just copy the direct product names into their profile - rather, we want to derive insights about the persona and background of the user.
     For example, if the user is buying hiking clothes and talking about playing sports, we can assume that this user is an active individual.
     If the user is buying a lot of books and talking about reading, we can assume that this user is an avid reader.
+    If the user talks about keeping warm, the user may live in a cold area, so save that he likes to be warn and might live in a cool environment.
     
     {profile_current}
 
-    Here is their most recent chat (customer represents the user and agent represents the agent the user is talking to)
+    Here is their most recent chat - this may be structured like a transcripts.
     {recent_chat}
 
     Here are the products that the user has bought:

@@ -1,4 +1,4 @@
-from llama_index import ServiceContext, VectorStoreIndex, SimpleDirectoryReader
+from llama_index import VectorStoreIndex, SimpleDirectoryReader, ServiceContext
 from llama_index.output_parsers import GuardrailsOutputParser
 from llama_index.llm_predictor import StructuredLLMPredictor
 from llama_index.prompts.prompts import QuestionAnswerPrompt, RefinePrompt
@@ -7,8 +7,9 @@ import openai
 import os 
 openai.api_key = "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"
 os.environ['OPENAI_API_KEY'] = "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"
+
 # load documents, build index
-documents = SimpleDirectoryReader('data').load_data()
+documents = SimpleDirectoryReader('company_data').load_data()
 index = VectorStoreIndex.from_documents(documents, chunk_size=512, openai_api_key = "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")
 llm_predictor = StructuredLLMPredictor()
 
