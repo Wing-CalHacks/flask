@@ -10,7 +10,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-
+from langchain.document_loaders import PyPDFLoader
 
 import csv
 embeddings = OpenAIEmbeddings(
@@ -71,3 +71,10 @@ def getWebsite(url):
     text = '\n'.join(chunk for chunk in chunks if chunk)
     return text
 
+
+def getPDF(filename):
+    loader = PyPDFLoader(filename)
+    pages = loader.load_and_split()
+    return pages
+
+ 
