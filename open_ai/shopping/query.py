@@ -108,6 +108,7 @@ def getResponse(query, user_profile, docsearch):
     result = (chain.run(input_documents=docs, question=prompt))
     print(parseResponse(result))
     print(strengthen_profile(user_profile, query + "\n" + result))
+    print(sendOutreachEmail(user_profile, query + "\n" + result, "There is a new summer sale selling all blue clothes for 50 dollars off", docsearch))
     return result
 
 
@@ -152,4 +153,45 @@ def strengthen_profile(cur_profile, recent_chat):
 
 
 
+def getOutReachPrompt(customer_profile, recent_chat, promotional_updates):
+    instructions = f'''You are an email sending bot that is sending an email to a customer. You are going to be given a customer profile and a recent chat transcript. You should use this information to send an email to the customer. The email should
+    - be personalized to the customer. For example, if the customer is a student, you should say something like "As a student, I know that you are very busy, so I will keep this email short."
+    - be personalized to the recent chat transcript. For example, if the customer is talking about a product, you should say something like "I noticed that you were talking about this product, so I wanted to send you some more information about it."
+
+    Furthermore, we will also be highlighting any promotional updates, whether they are new products or new deals. You should include these in your email.
+
+    Here is the customer_profile:
+    {customer_profile}
+
+    Here is the customer's recent chat transcript:
+    {recent_chat}
+
+    Here are the promotional updates:
+    {promotional_updates}
+
+    Your email must be structured like:
+    
+    <greeting>
+
+    <body>
+
+    <closing>
+
+    Email:
+
+    '''
+    return instructions
+
+def sendOutreachEmail(customer_profile, recent_chat, promotional_updates, docsearch):
+    llm = OpenAI(
+        temperature=0.5, openai_api_key="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")
+    chain = load_qa_chain(llm, chain_type="stuff")
+
+    print ("Searching")
+    docs = docsearch.similarity_search(customer_profile + recent_chat + promotional_updates , 2)
+    print ("Found")
+    prompt = getOutReachPrompt(customer_profile, recent_chat, promotional_updates)
+     
+    result = (chain.run(input_documents=docs, question=prompt))
+    return result
 
