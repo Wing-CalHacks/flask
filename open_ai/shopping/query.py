@@ -69,12 +69,13 @@ def getPrompt(query, user_profile):
 
     Your response, if the user is asking to buy something, should be structured like:
 
-    <product_1>: <price_1> | <url (optional_1 )>
-    <product_2>: <price_2> | <url (optional_2 )>
+    
+    <product_1> | <price_1> | <url associated with <product_1>>
+    <product_2> | <price_2> | <url associated with <product_2>>
     ...
     <reasoning for selecting these products>
 
-    MAKE SURE YOUR RESPONSE IS ACCORDING TO OUR STRUCTURE!
+    We are putting the output through a QA model, so make sure that you are outputting the product name, price, and url in the format above.
     """
     print (query)
     return query
@@ -96,15 +97,16 @@ def parseResponse(response):
 
 def getResponse(query, user_profile, docsearch):
     # get the path_name of the file in data folder
+    print ("GETTING RESPONSE")
     llm = OpenAI(
-        temperature=0.5, openai_api_key="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")
+        temperature=0.3, openai_api_key="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")
     chain = load_qa_chain(llm, chain_type="stuff")
 
     print ("Searching")
     docs = docsearch.similarity_search(query, 2)
     print ("Found")
     prompt = getPrompt(query, user_profile)
-     
+    
     result = (chain.run(input_documents=docs, question=prompt))
     print(parseResponse(result))
     print(strengthen_profile(user_profile, query + "\n" + result))
@@ -184,7 +186,7 @@ def getOutReachPrompt(customer_profile, recent_chat, promotional_updates):
 
 def sendOutreachEmail(customer_profile, recent_chat, promotional_updates, docsearch):
     llm = OpenAI(
-        temperature=0.5, openai_api_key="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")
+        temperature=0.3, openai_api_key="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")
     chain = load_qa_chain(llm, chain_type="stuff")
 
     print ("Searching")

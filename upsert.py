@@ -103,7 +103,6 @@ def upload_file():
     file_type, _ = mimetypes.guess_type(file_path)
     extension = file_type.split('/')[-1]
 
-    print(extension)
     if extension == 'pdf':
         loader = PyPDFLoader(file_path)
         data = loader.load()
